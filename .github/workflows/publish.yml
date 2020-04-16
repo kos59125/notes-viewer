@@ -1,0 +1,38 @@
+name: Publish Application
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Add appsettings.json
+      run: 'echo "$APPSETTINGS_JSON" > src/RecycleBin.Notes/appsettings.Production.json'
+      shell: bash
+      env:
+        APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Publish
+      run: dotnet publish --configuration Release --no-build
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        publish_dir: ./app/wwwroot
+        external_repository: kos59125/notes
+        publish_branch: gh-pages
+        cname: notes.recyclebin.jp
