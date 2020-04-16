@@ -1,0 +1,67 @@
+<section class="section">
+  ${FileList}
+  ${Pager}
+</section>
+
+<template id="Directory">
+  <article class="media">
+    <figure class="media-left">
+      <i class="fas fa-folder fa-2x"></i>
+    </figure>
+    <div class="media-content">
+      <div class="content">
+        <p>
+          <a href="${LinkUrl}" onclick="${OpenDirectory}">
+            <strong>${Name}</strong>
+          </a>
+        </p>
+      </div>
+    </div>
+  </article>
+</template>
+
+<template id="File">
+  <article class="media">
+    <figure class="media-left">
+      <i class="fas fa-file fa-2x"></i>
+    </figure>
+    <div class="media-content">
+      <div class="content">
+        <p>
+          <strong>${Title}</strong>
+          <br />
+          ${ContentsDigest}
+        </p>
+      </div>
+      <nav class="level is-mobile">
+        <div class="level-left">
+          <a class="level-item" href="${LinkUrl}" onclick="${ReadMore}">
+            Read more...
+          </a>
+        </div>
+      </nav>
+    </div>
+  </article>
+</template>
+
+<template id="LoadFailed">
+  <div class="notification is-danger is-light">
+    <p><strong>An error occurred</strong>: ${Reason}</p>
+  </div>
+</template>
+
+<template id="NotFound">
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container">
+        <h1 class="title">
+          Content Not Loaded
+        </h1>
+        <p>
+          Failed to load the requested article because the requested does not exist or an unexpeted error occurred.
+          <a href="/">Return to the top page</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</template>

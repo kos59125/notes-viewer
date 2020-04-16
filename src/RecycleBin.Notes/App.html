@@ -1,0 +1,110 @@
+<header>
+  <nav class="navbar is-fixed-top is-info" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item is-size-4 has-text-weight-bold" href="/">
+        ${Title}
+      </a>
+      <a role="button" class="navbar-burger burger ${IsDropdownActive}" aria-label="menu" aria-expanded="false" onclick="${ToggleDropdownMenu}">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="navbar-menu ${IsDropdownActive}">
+      <div class="navbar-start">
+      </div>
+      <div class="navbar-end">
+        <div class="navbar-item">
+          <div class="field is-grouped">
+            ${GitHub}
+            ${Twitter}
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <nav class="breadcrumb is-centered" aria-label="breadcrumbs">
+    <ul>
+      ${Breadcrumb}
+    </ul>
+  </nav>
+  ${Notification}
+</header>
+<main class="main" role="main">
+  ${Main}
+  ${DebugView}
+</main>
+<footer class="footer">
+  <nav class="navbar is-fixed-bottom" role="navigation" aria-label="footer navigation">
+    <div class="navbar-menu">
+      <div class="navbar-start">
+        ${DebugButton}
+        ${GitHubRateLimit}
+      </div>
+      <div class="navbar-end">
+        <p class="navbar-item">${Copyright}</p>
+      </div>
+    </div>
+  </nav>
+</footer>
+
+<template id="GitHubAccountLink">
+  <p class="control">
+    <a class="button is-light" href="${GitHubAccountUrl}" target="_blank" rel="noopener">
+      <span class="icon">
+        <i class="fab fa-github"></i>
+      </span>
+      <span>
+        GitHub
+      </span>
+    </a>
+  </p>
+</template>
+
+<template id="TwitterAccountLink">
+  <p class="control">
+    <a class="button is-light" href="${TwitterAccountUrl}" target="_blank" rel="noopener">
+      <span class="icon">
+        <i class="fab fa-twitter"></i>
+      </span>
+      <span>
+        Twitter
+      </span>
+    </a>
+  </p>
+</template>
+
+<template id="GitHubRateLimitInfo">
+  <span class="navbar-item">
+    <span>
+      Rate Limit: ${RateLimitRemaining}/${RateLimit} (reset at ${RateLimitReset})
+    </span>
+    <span class="icon">
+      <a href="https://developer.github.com/v3/#rate-limiting" target="_blank" rel="noopener">
+        <i class="fas fa-info-circle"></i>
+      </a>
+    </span>
+  </span>
+</template>
+
+<template id="DebugInfo">
+  <section class="section">
+    <div class="container">
+      <table class="table is-fullwidth">
+        <caption>Debug Info</caption>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Client IP Address</td>
+            <td>${ClientIPAddress}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</template>
