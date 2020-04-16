@@ -31,7 +31,7 @@ jobs:
         path: ./app/wwwroot
 
   deploy:
-    nees: build
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Download application
