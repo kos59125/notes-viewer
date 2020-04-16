@@ -1,0 +1,24 @@
+name: Deploy Notes Viewer
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download application
+      uses: actions/download-artifact@v1
+      with:
+        name: app
+        path: ./app/wwwroot
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        publish_dir: ./app/wwwroot
+        external_repository: kos59125/notes
+        publish_branch: gh-pages
+        cname: notes.recyclebin.jp
