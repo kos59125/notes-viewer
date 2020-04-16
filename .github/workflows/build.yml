@@ -1,4 +1,4 @@
-name: Publish Application
+name: Build Application
 
 on:
   push:
@@ -28,11 +28,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Publish
       run: dotnet publish --configuration Release --no-build
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    - uses: actions/upload-artifact@v1
+      if: success()
       with:
-        deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-        publish_dir: ./app/wwwroot
-        external_repository: kos59125/notes
-        publish_branch: gh-pages
-        cname: notes.recyclebin.jp
+        name: app
+        path: ./app/wwwroot
