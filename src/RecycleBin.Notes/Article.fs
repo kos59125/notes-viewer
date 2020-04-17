@@ -10,6 +10,7 @@ open Elmish
 type private ArticleTemplate = Template<const(__SOURCE_DIRECTORY__ + "/Article.html")>
 
 type Model = {
+   Path : GitHub.GitHubFilePath
    Title : string
    ContentsHtml : string
    LatestCommitHash : string option
@@ -21,8 +22,8 @@ type Model = {
 }
 
 type Message =
-   | GetArticle of GitHub.GitHubFilePath
-   | GotCommits of GitHub.RepositoryCommits.Root[] * GitHub.GitHubFilePath
+   | GetArticle
+   | GotCommits of GitHub.RepositoryCommits.Root[]
    | GotContents of GitHub.RepositoryFileContents.Root
    | Highlight
    | HashSmoothScroll
@@ -31,6 +32,7 @@ type Message =
    
 let init (path:GitHub.GitHubFilePath) : Model * Cmd<Message> =
    let model = {
+      Path = path
       Title = ""
       ContentsHtml = ""
       LatestCommitHash = None
@@ -38,29 +40,29 @@ let init (path:GitHub.GitHubFilePath) : Model * Cmd<Message> =
       Published = None
       LastUpdated = None
    }
-   let cmd = Cmd.ofMsg <| GetArticle(path)
+   let cmd = Cmd.ofMsg GetArticle
    model, cmd
 
 let update (github:GitHub.GitHubRestClient) (js:IJSRuntime) message model =
    match message with
-   | GetArticle(path) ->
-      let cmd = Cmd.ofAsync github.GetFileHistoryAsync path (fun res -> GotCommits(res, path)) Error
+   | GetArticle ->
+      let cmd = Cmd.ofAsync github.GetFileHistoryAsync model.Path GotCommits Error
       model, cmd
-   | GotCommits([|commit|], path) ->
+   | GotCommits([|commit|]) ->
       let model = {
          model with
             Published = Some(commit.Commit.Author.Date.DateTime)
             LastUpdated = None
       }
-      let cmd = Cmd.ofAsync github.GetFileContentsAsync path GotContents Error
+      let cmd = Cmd.ofAsync github.GetFileContentsAsync model.Path GotContents Error
       model, cmd
-   | GotCommits(history, path) ->
+   | GotCommits(history) ->
       let model = {
          model with
             Published = Some(history.[history.Length - 1].Commit.Author.Date.DateTime)
             LastUpdated = Some(history.[0].Commit.Author.Date.DateTime)
       }
-      let cmd = Cmd.ofAsync github.GetFileContentsAsync path GotContents Error
+      let cmd = Cmd.ofAsync github.GetFileContentsAsync model.Path GotContents Error
       model, cmd
    | GotContents(contents) ->
       let cmd = Cmd.batch [
@@ -102,6 +104,7 @@ let view model dispatch =
                   | Some(date) -> viewDate <| date.ToString("yyyy-MM-dd")
                   | None -> Html.empty
       )
+      .SourceCodeUrl(sprintf "https://github.com/%s/%s/tree/master/%s" model.Path.Owner model.Path.Repository model.Path.Path)
       .Contents(Node.RawHtml(model.ContentsHtml))
       .Elt()
 
