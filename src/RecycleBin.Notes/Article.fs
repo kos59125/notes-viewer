@@ -102,7 +102,10 @@ let view model dispatch =
             | None ->
                Html.cond model.LastUpdated <| function
                   | Some(date) -> viewDate <| date.ToString("yyyy-MM-dd")
-                  | None -> Html.empty
+                  | None ->
+                     Html.cond model.Published <| function
+                        | Some(date) -> viewDate <| date.ToString("yyyy-MM-dd")
+                        | None -> Html.empty
       )
       .SourceCodeUrl(sprintf "https://github.com/%s/%s/tree/master/%s" model.Path.Owner model.Path.Repository model.Path.Path)
       .Contents(Node.RawHtml(model.ContentsHtml))
