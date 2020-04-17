@@ -25,7 +25,8 @@ type Message =
    | GotCommits of GitHub.RepositoryCommits.Root[] * GitHub.GitHubFilePath
    | GotContents of GitHub.RepositoryFileContents.Root
    | Highlight
-   | Highlighted
+   | HashSmoothScroll
+   | JsInvoked
    | Error of exn
    
 let init (path:GitHub.GitHubFilePath) : Model * Cmd<Message> =
@@ -62,16 +63,22 @@ let update (github:GitHub.GitHubRestClient) (js:IJSRuntime) message model =
       let cmd = Cmd.ofAsync github.GetFileContentsAsync path GotContents Error
       model, cmd
    | GotContents(contents) ->
-      let cmd = Cmd.ofMsg Highlight
+      let cmd = Cmd.batch [
+         Cmd.ofMsg HashSmoothScroll
+         Cmd.ofMsg Highlight
+      ]
       match GitHub.decodeContent contents.Content |> Markdown.parseMarkdown with
       | Markdown.Document(html, _, Some(header)) ->
          { model with Title = header.Title; Date = Option.ofObj header.Date; ContentsHtml = html }, cmd
       | Markdown.Document(html, _, None) ->
          { model with Title = "(No Title)"; Date = None; ContentsHtml = html }, cmd
    | Highlight ->
-      let cmd = Cmd.ofAsync js.HighlightHtml ()  (fun _ -> Highlighted) Error
+      let cmd = Cmd.ofAsync js.HighlightHtml ()  (fun _ -> JsInvoked) Error
       model, cmd
-   | Highlighted ->
+   | HashSmoothScroll ->
+      let cmd = Cmd.ofAsync js.SmoothScrollToHash () (fun _ -> JsInvoked) Error
+      model, cmd
+   | JsInvoked ->
       model, Cmd.none  // do nothing
    | Error(_) ->
       model, Cmd.none  // propagate

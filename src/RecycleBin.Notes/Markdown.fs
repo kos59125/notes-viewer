@@ -60,6 +60,7 @@ let private pipeline =
       .UseYamlFrontMatter()
       .UseAutoIdentifiers()
       .UseAutoLinks()
+      .UseFootnotes()
       .UsePipeTables()
       .UseMathematics()
       .Use(BulmaMarkdownExtension())
