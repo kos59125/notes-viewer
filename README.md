@@ -1,3 +1,5 @@
+![Deploy Notes Viewer](https://github.com/kos59125/notes-viewer/workflows/Deploy%20Notes%20Viewer/badge.svg)
+
 # notes-viewer
 
 GitHub の認証不要な API を利用して GitHub のリポジトリー内の Markdown をブログ形式で見るためのウェブアプリケーションです。
