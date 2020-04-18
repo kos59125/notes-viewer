@@ -48,6 +48,8 @@ type Model = {
 
 type Message =
    | SetPage of Page
+   | Ignore
+   | SetHead
    | InitializePage
    | HideDropdownMenu
    | ToggleDropdownMenu
@@ -108,7 +110,7 @@ let init () =
       }
 #endif
    }
-   let cmd = Cmd.none
+   let cmd = Cmd.ofMsg SetHead
    model, cmd
 
 let private updateExplorer model (explorer, cmd) =
@@ -134,7 +136,7 @@ let private getClientIpAddress (client:HttpClient) = async {
 }
 #endif
 
-let update options program message model =
+let update options (program:ProgramComponent<_, _>) message model =
    match message with
    | SetPage(page) ->
       if model.Page = page then
@@ -145,6 +147,15 @@ let update options program message model =
             Cmd.ofMsg InitializePage
          ]
          { model with Page = page }, cmd
+   | Ignore ->
+      model, Cmd.none
+   | SetHead ->
+      let js = program.JSRuntime
+      let cmd = Cmd.batch [
+         Cmd.ofAsync js.setTitle options.Title (fun _ -> Ignore) Error
+         Cmd.ofAsync js.setIcon options.Icon (fun _ -> Ignore) Error
+      ]
+      model, cmd
    | InitializePage ->
       match model.Page with
       | EmptyPage -> model, Cmd.none
