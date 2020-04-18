@@ -29,6 +29,10 @@ Development は Debug ビルド、 Production は Release ビルドに対応し�
   "Note": {
     "Title": "ブログタイトル",
     "Copyright": "コピーライト表記",
+    "Icon": {
+      "IconUrl": "Favicon の URL",
+      "MediaType": "Favicon のメディアタイプ（image/png 等）"
+    }
     "GitHub": "GitHub のアカウント URL",
     "Twitter": "Twitter のアカウント URL",
     "Owner": "GitHub アカウント",
