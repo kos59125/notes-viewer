@@ -2,7 +2,6 @@ module RecycleBin.Notes.App
 
 open System
 open System.Web
-open Microsoft.AspNetCore.Components
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Options
 open Bolero
@@ -296,8 +295,10 @@ let view options model dispatch =
             | Article(_) -> Html.ecomp<Article.View, _, _> [] model.Article (ReceiveArticleMessage >> dispatch)
       )
       .Notification(
-         Html.forEach model.Notification <| fun (id, notification) ->
-            Html.ecomp<Notification.View, _, _> [] notification (fun message -> ReceiveNotificationMessage(id, message) |> dispatch)
+         Html.div [Html.attr.classes ["error-list"]] [
+            Html.forEach model.Notification <| fun (id, notification) ->
+               Html.ecomp<Notification.View, _, _> [] notification (fun message -> ReceiveNotificationMessage(id, message) |> dispatch)
+         ]
       )
       .GitHubRateLimit(
          Html.cond model.GitHubRateLimit <| function
