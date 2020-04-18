@@ -25,6 +25,7 @@ type Message =
    | GetArticle
    | GotCommits of GitHub.RepositoryCommits.Root[]
    | GotContents of GitHub.RepositoryFileContents.Root
+   | RenderContents
    | Highlight
    | HashSmoothScroll
    | JsInvoked
@@ -65,15 +66,17 @@ let update (github:GitHub.GitHubRestClient) (js:IJSRuntime) message model =
       let cmd = Cmd.ofAsync github.GetFileContentsAsync model.Path GotContents Error
       model, cmd
    | GotContents(contents) ->
+      match GitHub.decodeContent contents.Content |> Markdown.parseMarkdown with
+      | Markdown.Document(html, _, Some(header)) ->
+         { model with Title = header.Title; Date = Option.ofObj header.Date; ContentsHtml = html }, Cmd.ofMsg RenderContents
+      | Markdown.Document(html, _, None) ->
+         { model with Title = "(No Title)"; Date = None; ContentsHtml = html }, Cmd.ofMsg RenderContents
+   | RenderContents ->
       let cmd = Cmd.batch [
          Cmd.ofMsg HashSmoothScroll
          Cmd.ofMsg Highlight
       ]
-      match GitHub.decodeContent contents.Content |> Markdown.parseMarkdown with
-      | Markdown.Document(html, _, Some(header)) ->
-         { model with Title = header.Title; Date = Option.ofObj header.Date; ContentsHtml = html }, cmd
-      | Markdown.Document(html, _, None) ->
-         { model with Title = "(No Title)"; Date = None; ContentsHtml = html }, cmd
+      model, cmd
    | Highlight ->
       let cmd = Cmd.ofAsync js.HighlightHtml ()  (fun _ -> JsInvoked) Error
       model, cmd

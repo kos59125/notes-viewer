@@ -157,10 +157,23 @@ let update options (program:ProgramComponent<_, _>) message model =
       ]
       model, cmd
    | InitializePage ->
+      let js = program.JSRuntime
       match model.Page with
       | EmptyPage -> model, Cmd.none
-      | Explorer(path) -> { model with Explorer = Loading }, Cmd.ofMsg <| StartExplorer(path)
-      | Article(path) -> { model with Article = Loading }, Cmd.ofMsg <| StartArticle(path)
+      | Explorer(path) ->
+         let model = { model with Explorer = Loading }
+         let cmd = Cmd.batch [
+            Cmd.ofAsync js.setTitle (match path with | None -> options.Title | Some(path) -> sprintf "%s - %s" path options.Title) (fun _ -> Ignore) Error
+            Cmd.ofMsg <| StartExplorer(path)
+         ]
+         model, cmd
+      | Article(path) ->
+         let model = { model with Article = Loading }
+         let cmd = Cmd.batch [
+            Cmd.ofAsync js.setTitle (sprintf "%s - %s" path options.Title) (fun _ -> Ignore) Error
+            Cmd.ofMsg <| StartArticle(path)
+         ]
+         model, cmd
    | HideDropdownMenu ->
       { model with ShowDropdownMenu = false }, Cmd.none
    | ToggleDropdownMenu ->
@@ -216,6 +229,7 @@ let update options (program:ProgramComponent<_, _>) message model =
    | ReceiveExplorerMessage(Explorer.Message.Error(ex)) ->
       model, Cmd.ofMsg <| Error(ex)
    | ReceiveExplorerMessage(Explorer.ReceiveFileMessage(index, Explorer.File.GotFile(file)) as message) ->
+      let js = program.JSRuntime
       let github = getGitHubClient program
       let url = Uri(router.Link(Article(file.Path)), UriKind.Relative)
       let setLink = Cmd.ofMsg (Explorer.File.SetLink(url)) |> Cmd.map (fun cmd -> Explorer.ReceiveFileMessage(index, cmd))
@@ -246,6 +260,15 @@ let update options (program:ProgramComponent<_, _>) message model =
       Article.init path |> updateArticle model |> getGitHubRateLimit
    | ReceiveArticleMessage(Article.Message.Error(ex)) ->
       model, Cmd.ofMsg <| Error(ex)
+   | ReceiveArticleMessage(Article.Message.RenderContents as message) ->
+      let js = program.JSRuntime
+      let github = getGitHubClient program
+      match AsyncModel.map (Article.update github js message) model.Article with
+      | Loaded(article, cmd) ->
+         let model, cmd = updateArticle model (article, cmd)
+         let setTitle = Cmd.ofAsync js.setTitle (sprintf "%s - %s" article.Title options.Title) (fun _ -> Ignore) Error
+         model, Cmd.batch [setTitle; cmd]
+      | _ -> model, Cmd.none
    | ReceiveArticleMessage(message) ->
       let github = getGitHubClient program
       match AsyncModel.map (Article.update github program.JSRuntime message) model.Article with
