@@ -36,7 +36,7 @@ type DebugModel = {
 type Model = {
    Page : Page
    ShowDropdownMenu : bool
-   Notification : Notification.Model list
+   Notification : (Guid * Notification.Model) list
    GitHubRateLimit : GitHubRateLimit option
 #if DEBUG
    ShowDebug : bool
@@ -52,7 +52,7 @@ type Message =
    | InitializePage
    | HideDropdownMenu
    | ToggleDropdownMenu
-   | ReceiveNotificationMessage of Notification.Message
+   | ReceiveNotificationMessage of Guid * Notification.Message
    | Error of exn
    | GetGitHubRateLimit
 #if DEBUG
@@ -155,12 +155,24 @@ let update options program message model =
       { model with ShowDropdownMenu = false }, Cmd.none
    | ToggleDropdownMenu ->
       { model with ShowDropdownMenu = not model.ShowDropdownMenu }, Cmd.none
-   | ReceiveNotificationMessage(message) ->
-      match List.map (Notification.update message) model.Notification with
-      | [] -> model, Cmd.none
-      | notification -> { model with Notification = notification }, Cmd.none
+   | ReceiveNotificationMessage(id, message) ->
+      let model = {
+         model with
+            Notification =
+               List.foldBack (fun ((notificationId, notification) as t) acc ->
+                  if notificationId = id then
+                     let notification = Notification.update message notification
+                     if notification.Shown then
+                        (notificationId, notification)::acc
+                     else
+                        acc
+                  else
+                     t::acc
+               ) model.Notification []
+      }
+      model, Cmd.none
    | Error(ex) ->
-      { model with Notification = Notification.error ex.Message :: model.Notification }, Cmd.ofMsg GetGitHubRateLimit
+      { model with Notification = (Guid.NewGuid(), Notification.error ex.Message)::model.Notification }, Cmd.ofMsg GetGitHubRateLimit
 #if DEBUG
    | ToggleDebugView ->
       let cmd =
@@ -284,8 +296,8 @@ let view options model dispatch =
             | Article(_) -> Html.ecomp<Article.View, _, _> [] model.Article (ReceiveArticleMessage >> dispatch)
       )
       .Notification(
-         Html.forEach model.Notification <| fun notification ->
-            Html.ecomp<Notification.View, _, _> [] notification (ReceiveNotificationMessage >> dispatch)
+         Html.forEach model.Notification <| fun (id, notification) ->
+            Html.ecomp<Notification.View, _, _> [] notification (fun message -> ReceiveNotificationMessage(id, message) |> dispatch)
       )
       .GitHubRateLimit(
          Html.cond model.GitHubRateLimit <| function
@@ -294,7 +306,7 @@ let view options model dispatch =
                AppTemplate.GitHubRateLimitInfo()
                   .RateLimit(string rateLimit.RateLimit)
                   .RateLimitRemaining(string rateLimit.RateLimitRemaining)
-                  .RateLimitReset(rateLimit.RateLimitReset.ToLocalTime().ToString("yyyy-MM-dd'T'HH:mm:sszzz"))
+                  .RateLimitReset(rateLimit.RateLimitReset.ToString("yyyy-MM-dd'T'HH:mm:sszzz"))
                   .Elt()
       )
 #if DEBUG
