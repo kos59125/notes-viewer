@@ -1,5 +1,5 @@
 <header>
-  <nav class="navbar is-fixed-top is-info" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-info" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a class="navbar-item is-size-4 has-text-weight-bold" href="/">
         ${Title}
@@ -35,18 +35,16 @@
   ${DebugView}
 </main>
 <footer class="footer">
-  <nav class="navbar is-fixed-bottom" role="navigation" aria-label="footer navigation">
-    <div class="navbar-menu">
-      <div class="navbar-start">
-        ${DebugButton}
-        ${GitHubRateLimit}
-      </div>
-      <div class="navbar-end">
-        <p class="navbar-item">${Copyright}</p>
-        <p class="navbar-item">Powered&nbsp;by&nbsp;<a href="https://github.com/kos59125/notes-viewer" target="_blank" rel="noopener">notes-viewer</a></p>
-      </div>
+  <div class="level is-light">
+    <div class="level-left">
+      ${DebugButton}
+      ${GitHubRateLimit}
     </div>
-  </nav>
+    <div class="level-right">
+      <p class="level-item">${Copyright}</p>
+      <p class="level-item">Powered&nbsp;by&nbsp;<a href="https://github.com/kos59125/notes-viewer" target="_blank" rel="noopener">notes-viewer</a></p>
+    </div>
+  </div>
 </footer>
 
 <template id="GitHubAccountLink">
@@ -76,7 +74,7 @@
 </template>
 
 <template id="GitHubRateLimitInfo">
-  <span class="navbar-item">
+  <div class="level-item">
     <span>
       Rate Limit: ${RateLimitRemaining}/${RateLimit} (reset at ${RateLimitReset})
     </span>
@@ -85,7 +83,18 @@
         <i class="fas fa-info-circle"></i>
       </a>
     </span>
-  </span>
+  </div>
+</template>
+
+<template id="DebugButtonView">
+  <div class="level-item">
+    <button class="button is-light" onclick="${ToggleDebugView}">
+      <span class="icon">
+        <i class="fas fa-bug"></i>
+      </span>
+      <span>${DebugButtonText}</span>
+    </button>
+  </div>
 </template>
 
 <template id="DebugInfo">

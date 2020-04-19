@@ -1,14 +1,22 @@
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.main {
+  flex: 1;
+}
+
 body {
   font-family: 'M PLUS 1p', sans-serif;
 }
-
 pre, code {
   font-family: 'Roboto Mono', monospace;
 }
 
 .footer {
   font-size: 0.8rem;
-  padding: 0;
+  padding: 0.5rem;
 }
 
 .error-list .notification {

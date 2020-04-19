@@ -346,14 +346,14 @@ let view options model dispatch =
       )
 #if DEBUG
       .DebugButton(
-         Html.span [Html.attr.classes ["navbar-item"]] [
-            Html.button [Html.attr.classes ["button"; "is-light"]; Html.on.click (fun _ -> ToggleDebugView |> dispatch)] [
-               Html.span [Html.attr.classes ["icon"]] [
-                  Html.i [Html.attr.classes ["fas"; "fa-bug"]] []
-               ]
-               Html.span [] [Html.text (if model.ShowDebug then "Hide" else "Show")]
-            ]
-         ]
+         AppTemplate.DebugButtonView()
+            .ToggleDebugView(fun _ -> ToggleDebugView |> dispatch)
+            .DebugButtonText(
+               Html.cond model.ShowDebug <| function
+                  | true -> Html.text "hide"
+                  | false -> Html.text "show"
+            )
+            .Elt()
       )
       .DebugView(
          match model.ShowDebug with
