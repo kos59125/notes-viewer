@@ -34,7 +34,7 @@ Development は Debug ビルド、 Production は Release ビルドに対応し�
     "Icon": {
       "IconUrl": "Favicon の URL",
       "MediaType": "Favicon のメディアタイプ（image/png 等）"
-    }
+    },
     "GitHub": "GitHub のアカウント URL",
     "Twitter": "Twitter のアカウント URL",
     "Owner": "GitHub アカウント",
