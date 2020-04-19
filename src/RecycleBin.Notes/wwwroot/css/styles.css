@@ -28,12 +28,18 @@ pre, code {
   background-color: transparent;
 }
 .content .hljs-ln .hljs-ln-line {
-  border: none;
-  padding: 0 0.25rem;
+  border-style: none;
+  padding: 0 0.5rem;
 }
 .content .hljs-ln .hljs-ln-numbers {
-  padding-right: 1.25rem;
+  padding: 0;
   text-align: right;
+}
+.content .hljs-ln .hljs-ln-n {
+  margin: 0;
+  padding: 0;
+  min-width: 1rem;
+  max-width: 2.5rem;
 }
 .content .hljs-ln .hljs-ln-code {
    white-space: pre-wrap;
