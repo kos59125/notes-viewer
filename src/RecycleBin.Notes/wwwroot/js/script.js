@@ -20,6 +20,7 @@ window.RecycleBin = {
 
     highlight: () => {
       document.querySelectorAll("pre code").forEach(hljs.highlightBlock);
+      document.querySelectorAll("code.hljs").forEach(hljs.lineNumbersBlock);
       document.querySelectorAll(".math").forEach(MathJax.typeset);
     },
 

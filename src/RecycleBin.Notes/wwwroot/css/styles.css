@@ -27,3 +27,15 @@ pre, code {
 .hljs {
    background-color: transparent;
 }
+.content .hljs-ln .hljs-ln-line {
+  border: none;
+  padding: 0 0.25rem;
+}
+.content .hljs-ln .hljs-ln-numbers {
+  padding-right: 1.25rem;
+  text-align: right;
+}
+.content .hljs-ln .hljs-ln-code {
+   white-space: pre-wrap;
+   word-break: break-all;
+}
