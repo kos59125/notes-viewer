@@ -25,7 +25,7 @@ pre, code {
 
 .content pre,
 .hljs {
-   background-color: transparent;
+  background-color: transparent;
 }
 .content .hljs-ln .hljs-ln-line {
   border: none;
@@ -38,4 +38,12 @@ pre, code {
 .content .hljs-ln .hljs-ln-code {
    white-space: pre-wrap;
    word-break: break-all;
+}
+.content .codeblock {
+  position: relative;
+}
+.content .codeblock .trigger-clipboard {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
