@@ -22,3 +22,8 @@ pre, code {
 .pagination {
    margin: 0.75rem 0;
 }
+
+.content pre,
+.hljs {
+   background-color: transparent;
+}
