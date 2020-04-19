@@ -13,6 +13,7 @@ type Model = {
    Path : GitHub.GitHubFilePath
    Title : string
    ContentsHtml : string
+   ContributionUrl : string option
    LatestCommitHash : string option
    Date : string option
    [<DateTimeFormat("yyyy-MM-dd")>]
@@ -36,6 +37,7 @@ let init (path:GitHub.GitHubFilePath) : Model * Cmd<Message> =
       Path = path
       Title = ""
       ContentsHtml = ""
+      ContributionUrl = None
       LatestCommitHash = None
       Date = None
       Published = None
@@ -66,11 +68,13 @@ let update (github:GitHub.GitHubRestClient) (js:IJSRuntime) message model =
       let cmd = Cmd.ofAsync github.GetFileContentsAsync model.Path GotContents Error
       model, cmd
    | GotContents(contents) ->
-      match GitHub.decodeContent contents.Content |> Markdown.parseMarkdown with
-      | Markdown.Document(html, _, Some(header)) ->
-         { model with Title = header.Title; Date = Option.ofObj header.Date; ContentsHtml = html }, Cmd.ofMsg RenderContents
-      | Markdown.Document(html, _, None) ->
-         { model with Title = "(No Title)"; Date = None; ContentsHtml = html }, Cmd.ofMsg RenderContents
+      let model =
+         match GitHub.decodeContent contents.Content |> Markdown.parseMarkdown with
+         | Markdown.Document(html, _, Some(header)) ->
+            { model with Title = header.Title; Date = Option.ofObj header.Date; ContentsHtml = html }
+         | Markdown.Document(html, _, None) ->
+            { model with Title = "(No Title)"; Date = None; ContentsHtml = html }
+      { model with ContributionUrl = Some(contents.Links.Html) }, Cmd.ofMsg RenderContents
    | RenderContents ->
       let cmd = Cmd.batch [
          Cmd.ofMsg HashSmoothScroll
@@ -110,7 +114,11 @@ let view model dispatch =
                         | Some(date) -> viewDate <| date.ToString("yyyy-MM-dd")
                         | None -> Html.empty
       )
-      .SourceCodeUrl(sprintf "https://github.com/%s/%s/tree/master/%s" model.Path.Owner model.Path.Repository model.Path.Path)
+      .ContributionLink(
+         Html.cond model.ContributionUrl <| function
+            | None -> Html.empty
+            | Some(url) -> ArticleTemplate.ContributionLink().SourceCodeUrl(url).Elt()
+      )
       .Contents(Node.RawHtml(model.ContentsHtml))
       .Elt()
 

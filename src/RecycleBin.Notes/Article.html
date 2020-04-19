@@ -16,11 +16,7 @@
             ${Date}
           </div>
           <div class="level-right">
-            <div class="level-item">
-              <a class="button is-text" href="${SourceCodeUrl}" target="_blank" rel="noopener">
-                contribute
-              </a>
-            </div>
+            ${ContributionLink}
           </div>
         </nav>
       </div>
@@ -31,6 +27,14 @@
       ${Contents}
     </div>
   </section>
+</template>
+
+<template id="ContributionLink">
+  <div class="level-item">
+    <a class="button is-text" href="${SourceCodeUrl}" target="_blank" rel="noopener">
+      contribute
+    </a>
+  </div>
 </template>
 
 <template id="NotFound">
