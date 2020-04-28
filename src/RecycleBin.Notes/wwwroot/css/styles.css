@@ -55,6 +55,9 @@ pre, code {
 }
 .content .codeblock {
   position: relative;
+  max-height: 28em;
+  overflow-y: auto;
+  margin: 1em auto;
 }
 .content .codeblock .trigger-clipboard {
   position: absolute;
