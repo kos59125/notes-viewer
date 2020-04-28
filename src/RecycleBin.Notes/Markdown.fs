@@ -1,7 +1,6 @@
 [<RequireQualifiedAccess>]
 module RecycleBin.Notes.Markdown
 
-open System
 open System.IO
 open Markdig
 open Markdig.Extensions
@@ -9,6 +8,7 @@ open Markdig.Extensions.Yaml
 open Markdig.Parsers
 open Markdig.Renderers
 open Markdig.Renderers.Html
+open Markdig.Renderers.Html.Inlines
 open Markdig.Syntax
 open Markdig.Syntax.Inlines
 open YamlDotNet.Serialization
@@ -28,32 +28,46 @@ type private HtmlAttributes with
       Seq.iter this.AddClass classes
 
 type private BulmaMarkdownExtension() =
-   
    let addBulmaAttributes (document:MarkdownDocument) =
       for node in document.Descendants() do
          match box node with
          | :? Tables.Table -> node.GetAttributes().AddClasses(["table"; "is-striped"; "is-fullwidth"])
          | :? Figures.Figure -> node.GetAttributes().AddClass("figure")
          | _ -> ()
-
    interface IMarkdownExtension with
-
       member _.Setup(pipeline:MarkdownPipelineBuilder) =
          pipeline.add_DocumentProcessed(ProcessDocumentDelegate(addBulmaAttributes))
-   
       member _.Setup(_pipeline:MarkdownPipeline, _renderer:IMarkdownRenderer) = 
          ()
 
 type private HighlightJsMarkdownExtension() =
    interface IMarkdownExtension with
-
       member _.Setup(pipeline:MarkdownPipelineBuilder) =
          match pipeline.BlockParsers.Find<FencedCodeBlockParser>() with
          | null -> ()
          | parser -> parser.InfoPrefix <- ""
-
       member _.Setup(_pipeline:MarkdownPipeline, _renderer:IMarkdownRenderer) = 
          ()
+
+type ExternalLinkExtension() =
+   let linkWriter =
+      MarkdownObjectRenderer<HtmlRenderer, LinkInline>.TryWriteDelegate(
+         fun _ link ->
+            let attributes = link.GetAttributes()
+            if link.Url.StartsWith("http") then
+               attributes.AddPropertyIfNotExist("target", "_blank")
+               attributes.AddPropertyIfNotExist("rel", "noopener")
+            false
+      )
+   interface IMarkdownExtension with
+      member _.Setup(_pipeline:MarkdownPipelineBuilder) =
+         ()
+      member _.Setup(_pipeline:MarkdownPipeline, renderer:IMarkdownRenderer) =
+         match renderer.ObjectRenderers.FindExact<LinkInlineRenderer>() with
+         | null -> ()
+         | linkRenderer ->
+            linkRenderer.TryWriters.Remove(linkWriter) |> ignore
+            linkRenderer.TryWriters.Add(linkWriter) |> ignore
 
 let private pipeline =
    MarkdownPipelineBuilder()
@@ -63,6 +77,7 @@ let private pipeline =
       .UseFootnotes()
       .UsePipeTables()
       .UseMathematics()
+      .Use(ExternalLinkExtension())
       .Use(BulmaMarkdownExtension())
       .Use(HighlightJsMarkdownExtension())
       .Build()
