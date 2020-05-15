@@ -125,12 +125,11 @@ let parseMarkdown = function
          |> Option.map (fun paragraph ->
             paragraph.Inline.Descendants()
             |> Seq.map box
-            |> Seq.filter (function
-               | :? LiteralInline -> true
-               | _ -> false
-            )
-            |> Seq.map string
-            |> String.concat ""
+            |> Seq.fold (fun acc -> function
+               | :? LiteralInline as x -> acc + string x
+               | :? CodeInline as x -> acc + x.Content
+               | _ -> acc
+            ) ""
          )
          |> function
             | None -> ""
