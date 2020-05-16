@@ -267,7 +267,7 @@ let update options (program:ProgramComponent<_, _>) message model =
       | Loaded(article, cmd) ->
          let model, cmd = updateArticle model (article, cmd)
          let setTitle = Cmd.ofAsync js.setTitle (sprintf "%s - %s" article.Title options.Title) (fun _ -> Ignore) Error
-         model, Cmd.batch [setTitle; cmd]
+         (model, Cmd.batch [setTitle; cmd]) |> getGitHubRateLimit
       | _ -> model, Cmd.none
    | ReceiveArticleMessage(message) ->
       let github = getGitHubClient program
