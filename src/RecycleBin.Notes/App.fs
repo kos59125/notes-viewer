@@ -282,6 +282,20 @@ let homeLink =
       ]
       Html.span [] [Html.text "Home"]
    ]
+let folderLink x =
+   Html.a [router.HRef(Explorer(Some(x)))] [
+      Html.span [Html.attr.classes ["icon"; "is-small"]] [
+         Html.i [Html.attr.classes ["fas"; "fa-folder"]] []
+      ]
+      Html.span [] [Html.text (GitHub.Path.basename x)]
+   ]
+let fileLink x =
+   Html.a [router.HRef(Explorer(Some(x)))] [
+      Html.span [Html.attr.classes ["icon"; "is-small"]] [
+         Html.i [Html.attr.classes ["fas"; "fa-file"]] []
+      ]
+      Html.span [] [Html.text (GitHub.Path.basename x)]
+   ]
 
 let view options model dispatch =
    AppTemplate()
@@ -304,20 +318,33 @@ let view options model dispatch =
             | EmptyPage -> Html.li [] [Html.ecomp<Loader.View, _, _> [] () ignore]
             | Explorer(None)
             | Explorer(Some("")) -> Html.li [Html.attr.classes ["is-active"]] [homeLink]
-            | Explorer(Some(path))
+            | Explorer(Some(path)) as current ->
+               let breadcrumbs = GitHub.Path.breadcrumb path
+               Html.concat [
+                  yield Html.li [] [homeLink]
+                  for index = 0 to breadcrumbs.Length - 2 do
+                     yield Html.li [] [folderLink breadcrumbs.[index]]
+                  yield Html.li [Html.attr.classes ["is-active"]] [
+                     Html.a [router.HRef(current); Attr("aria-current", "page")] [
+                        Html.span [Html.attr.classes ["icon"; "is-small"]] [
+                           Html.i [Html.attr.classes ["fas"; "fa-folder"]] []
+                        ]
+                        Html.span [] [Html.text (GitHub.Path.basename path)]
+                     ]
+                  ] 
+               ]
             | Article(path) as current ->
                let breadcrumbs = GitHub.Path.breadcrumb path
                Html.concat [
                   yield Html.li [] [homeLink]
                   for index = 0 to breadcrumbs.Length - 2 do
-                     yield Html.li [] [
-                        Html.a [router.HRef(Explorer(Some(breadcrumbs.[index])))] [
-                           Html.text (GitHub.Path.basename breadcrumbs.[index])
-                        ]
-                     ]
+                     yield Html.li [] [folderLink breadcrumbs.[index]]
                   yield Html.li [Html.attr.classes ["is-active"]] [
                      Html.a [router.HRef(current); Attr("aria-current", "page")] [
-                        Html.text (GitHub.Path.basename path)
+                        Html.span [Html.attr.classes ["icon"; "is-small"]] [
+                           Html.i [Html.attr.classes ["fas"; "fa-file"]] []
+                        ]
+                        Html.span [] [Html.text (GitHub.Path.basename path)]
                      ]
                   ] 
                ]
